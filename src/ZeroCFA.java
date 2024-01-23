@@ -36,7 +36,7 @@ public class ZeroCFA {
 
     private String getData(Node node) {
         String result = this.data.get(node).toString();
-        if (result.equals("")) {
+        if (result.equals("{}")) {
             result = "∅";
         }
         return result;

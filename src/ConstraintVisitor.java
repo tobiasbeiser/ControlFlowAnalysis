@@ -10,18 +10,23 @@ import types.constraint.Constraint;
 import types.constraint.NodeConstraint;
 import types.constraint.TermConstraint;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<Constraint>> {
     private int label = 0;
+    private Map<AFnTerm, Integer> functionToBodyLabels = new HashMap<>();
+    private Map<AFunTerm, Integer> recFunctionToBodyLabels = new HashMap<>();
 
     public List<Constraint> getConstraints(fun.node.Start ast) {
         return ast.apply(this, new ArrayList<>());
     }
 
     @Override //[con]
-    public List<Constraint> caseACnumConst(ACnumConst node, List<Constraint> helper) {
+    public List<Constraint> caseAConstTerm(AConstTerm node, List<Constraint> helper) {
         return new ArrayList<>();
     }
 
@@ -39,6 +44,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         PrettyVisitor prettyVisitor = new PrettyVisitor();
         List<Constraint> constraints = new ArrayList<>();
         List<Constraint> c2 = node.getTerm().apply(this, helper);
+        functionToBodyLabels.put(node, this.label);
         Term term = new Term(prettyVisitor.caseAFnTerm(node, 0));
         Constraint constraint = new TermConstraint(new Terms(term), new Cache(++this.label));
         constraints.add(constraint);
@@ -51,12 +57,38 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         PrettyVisitor prettyVisitor = new PrettyVisitor();
         List<Constraint> constraints = new ArrayList<>();
         List<Constraint> c2 = node.getTerm().apply(this, helper);
+        recFunctionToBodyLabels.put(node, this.label);
         Term term = new Term(prettyVisitor.caseAFunTerm(node, 0));
         Constraint c1 = new TermConstraint(new Terms(term), new Cache(++this.label));
-        Constraint c3 = new TermConstraint(new Terms(term), new Environment(node.getParam().getText().trim()));
+        Constraint c3 = new TermConstraint(new Terms(term), new Environment(node.getName().getText().trim()));
         constraints.add(c1);
         constraints.addAll(c2);
         constraints.add(c3);
+        return constraints;
+    }
+
+
+
+
+    private List<Constraint> getConditionalConstraintFromTerm(PTerm term, int label) {
+        List<Constraint> constraints = new ArrayList<>();
+        if (term instanceof AFnTerm) {
+            String var = ((AFnTerm) term).getId().getText().trim();
+            ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
+                    new Terms(new Term(term.apply(new PrettyVisitor(), 0))),
+                    new Cache(label),
+                    new Cache(label + 1),
+                    new Environment(var));
+            constraints.add(cc_fn_rx);
+        } else if (term instanceof AFunTerm) {
+            String var = ((AFunTerm) term).getParam().getText().trim();
+            ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
+                    new Terms(new Term(term.apply(new PrettyVisitor(), 0))),
+                    new Cache(label),
+                    new Cache(label + 1),
+                    new Environment(var));
+            constraints.add(cc_fn_rx);
+        }
         return constraints;
     }
 
@@ -70,57 +102,44 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         int appLabel = ++this.label;
 
         PrettyVisitor prettyVisitor = new PrettyVisitor();
-        String term1 = node.getFun().apply(prettyVisitor, 0);
+
         String term2 = node.getArg().apply(prettyVisitor, 0);
 
-        if (node.getFun() instanceof AFnTerm || node.getFun() instanceof AFunTerm) {
-            PTerm fun = node.getFun();
-            String var = "";
-            if (fun instanceof AFnTerm) {
-                var = ((AFnTerm) fun).getId().getText().trim();
-            } else {
-                var = ((AFunTerm) fun).getParam().getText().trim();
-            }
+        for (var fnTerm:functionToBodyLabels.keySet()){
+            String term = fnTerm.apply(prettyVisitor, 0);
+
 
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
-                    new Terms(new Term(term1)),
+                    new Terms(new Term(term)),
                     new Cache(term1Label),
                     new Cache(term2Label),
-                    new Environment(var));
+                    new Environment(fnTerm.getId().getText().trim()));
             constraints.add(cc_fn_rx);
 
             ConditionalConstraint cc_fn_c = new ConditionalConstraint(
-                    new Terms(new Term(term1)),
+                    new Terms(new Term(term)),
                     new Cache(term1Label),
-                    new Cache(term1Label - 1),
+                    new Cache(functionToBodyLabels.get(fnTerm)),
                     new Cache(appLabel));
             constraints.add(cc_fn_c);
         }
 
-        if (node.getArg() instanceof AFnTerm || node.getArg() instanceof AFunTerm) {
-            PTerm fun = node.getArg();
-            String var = "";
-            if (fun instanceof AFnTerm) {
-                var = ((AFnTerm) fun).getId().getText().trim();
-            } else {
-                var = ((AFunTerm) fun).getParam().getText().trim();
-            }
+        for (var funTerm:recFunctionToBodyLabels.keySet()){
+            String term = funTerm.apply(prettyVisitor, 0);
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
-                    new Terms(new Term(term2)),
+                    new Terms(new Term(term)),
                     new Cache(term1Label),
                     new Cache(term2Label),
-                    new Environment(var));
+                    new Environment(funTerm.getParam().getText().trim()));
             constraints.add(cc_fn_rx);
 
             ConditionalConstraint cc_fn_c = new ConditionalConstraint(
-                    new Terms(new Term(term2)),
+                    new Terms(new Term(term)),
                     new Cache(term1Label),
-                    new Cache(term2Label - 1),
+                    new Cache(recFunctionToBodyLabels.get(funTerm)),
                     new Cache(appLabel));
             constraints.add(cc_fn_c);
         }
-
-
         return constraints;
     }
 

@@ -43,4 +43,14 @@ public class PrettyVisitorWithLabels extends PrettyVisitor {
     public String caseALetTerm(ALetTerm node, Integer helper) {
         return "(" + super.caseALetTerm(node, helper) + ")" + getLabel();
     }
+
+    @Override
+    public String caseAConstTerm(AConstTerm node, Integer helper) {
+        return super.caseAConstTerm(node, helper) + getLabel();
+    }
+
+    @Override
+    public String caseABinopTerm(ABinopTerm node, Integer helper) {
+        return super.caseABinopTerm(node, helper) + getLabel();
+    }
 }

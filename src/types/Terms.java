@@ -45,7 +45,7 @@ public class Terms {
         if (builder.length() > 2) {
             builder.delete(builder.length() - 2, builder.length());
         }
-        return builder.toString();
+        return "{" + builder.toString() + "}";
     }
 
     @Override
