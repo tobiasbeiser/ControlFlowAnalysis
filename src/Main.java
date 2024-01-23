@@ -19,10 +19,12 @@ public class Main {
                 Start ast = parser.parse();
                 PrettyVisitor print = new PrettyVisitorWithLabels();
                 ConstraintVisitor constraintVisitor = new ConstraintVisitor();
+                System.out.println("Given program:");
                 System.out.println(print.getString(ast));
                 List<Constraint> constraints = constraintVisitor.getConstraints(ast);
 
                 ZeroCFA zeroCFA = new ZeroCFA();
+                System.out.println("Result of analysis:");
                 zeroCFA.worklist(constraints);
 
 
