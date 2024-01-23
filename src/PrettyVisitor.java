@@ -22,7 +22,8 @@ import fun.node.Start;
 
 
 public class PrettyVisitor extends fun.analysis.GAnalysisAdapter<String,Integer> {
-	
+
+
 	public String getString(fun.node.Start ast) {
 		return ast.apply(this,0);
 	}

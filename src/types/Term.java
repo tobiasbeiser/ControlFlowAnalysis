@@ -2,14 +2,8 @@ package types;
 
 public class Term {
     private String value;
-    private int label;
-
-    public Term(String value, int label) {
+    public Term(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override
@@ -21,8 +15,12 @@ public class Term {
     public boolean equals(Object obj) {
         if (obj instanceof Term) {
             Term other = (Term) obj;
-            return value.equals(other.value) && label== other.label;
+            return value.equals(other.value);
         }
         return false;
+    }
+    @Override
+    public int hashCode() {
+        return value.hashCode();
     }
 }

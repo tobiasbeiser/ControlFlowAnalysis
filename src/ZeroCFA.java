@@ -18,7 +18,7 @@ public class ZeroCFA {
     public ZeroCFA() {
     }
 
-    private Set<Node> extractNodes(ArrayList<Constraint> constraints) {
+    private Set<Node> extractNodes(List<Constraint> constraints) {
         Set<Node> nodes = new HashSet<>();
         for (Constraint constraint : constraints) {
             nodes.addAll(constraint.getNodes());
@@ -42,7 +42,7 @@ public class ZeroCFA {
         return result;
     }
 
-    public void worklist(ArrayList<Constraint> constraints) {
+    public void worklist(List<Constraint> constraints) {
         Set<Node> nodes = extractNodes(constraints);
 
 
@@ -70,9 +70,11 @@ public class ZeroCFA {
         }
 
         //STEP 3 Iteration
+        int count = 0;
         while (worklist.size() > 0) {
             Node q = worklist.remove(0);
             for (Constraint constraint : this.edges.get(q)) {
+                count++;
                 if (constraint instanceof NodeConstraint) {
                     Node p1 = ((NodeConstraint) constraint).getP1();
                     Node p2 = ((NodeConstraint) constraint).getP2();
@@ -89,6 +91,7 @@ public class ZeroCFA {
                 }
             }
         }
+        System.out.println("Number of iterations: " + count);
 
         //STEP 4 Output
         for (Cache node : nodes.stream().filter(n -> n instanceof Cache).map(n -> (Cache) n).sorted((Comparator.comparingInt(Cache::getLabel))).toList()) {

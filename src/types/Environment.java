@@ -14,4 +14,18 @@ public class Environment implements Node{
     public String toString() {
         return "r(" + variable + ")";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Environment) {
+            Environment other = (Environment) obj;
+            return variable.equals(other.variable);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return variable.hashCode();
+    }
 }

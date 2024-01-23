@@ -14,4 +14,18 @@ public class Cache implements Node {
     public String toString() {
         return "C(" + label + ")";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Cache) {
+            Cache other = (Cache) obj;
+            return label == other.label;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return label;
+    }
 }
