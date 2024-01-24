@@ -5,11 +5,11 @@ import java.util.Map;
 
 public class PrettyVisitorWithLabels extends PrettyVisitor {
     private int label = 0;
-    private final Map<Node, Integer> labels = new HashMap<>();
+    private final Map<Node, Integer> terms = new HashMap<>();
 
     private String getLabel(Node node) {
         String exponent = Integer.toString(++this.label);
-        labels.put(node, this.label);
+        terms.put(node, this.label);
         String[] digits = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"};
 
         // Convert the integer to a superscript string
@@ -20,8 +20,8 @@ public class PrettyVisitorWithLabels extends PrettyVisitor {
         return result.toString();
     }
 
-    public Map<Node, Integer> getLabels() {
-        return this.labels;
+    public Map<Node, Integer> getTerms() {
+        return this.terms;
     }
 
     @Override

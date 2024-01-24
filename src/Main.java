@@ -21,7 +21,7 @@ public class Main {
                 ConstraintVisitor constraintVisitor = new ConstraintVisitor();
                 System.out.println("Given program:");
                 System.out.println(print.getString(ast));
-                List<Constraint> constraints = constraintVisitor.getConstraints(ast, print.getLabels());
+                List<Constraint> constraints = constraintVisitor.getConstraints(ast, print.getTerms());
 
                 ZeroCFA zeroCFA = new ZeroCFA();
                 System.out.println("Result of analysis:");

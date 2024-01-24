@@ -17,10 +17,10 @@ import java.util.Map;
 public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<Constraint>> {
     private int label = 0;
 
-    private final Map<Node, Integer> labels = new HashMap<>();
+    private final Map<Node, Integer> terms = new HashMap<>();
 
-    public List<Constraint> getConstraints(fun.node.Start ast, Map<Node, Integer> labels) {
-        this.labels.putAll(labels);
+    public List<Constraint> getConstraints(fun.node.Start ast, Map<Node, Integer> terms) {
+        this.terms.putAll(terms);
         return ast.apply(this, new ArrayList<>());
     }
 
@@ -74,7 +74,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
 
         PrettyVisitor prettyVisitor = new PrettyVisitor();
 
-        for (var fnTerm : labels.keySet().stream().filter(n -> n instanceof AFnTerm).map(n -> (AFnTerm) n).toList()) {
+        for (var fnTerm : terms.keySet().stream().filter(n -> n instanceof AFnTerm).map(n -> (AFnTerm) n).toList()) {
             String term = fnTerm.apply(prettyVisitor, 0);
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
                     new Terms(new Term(term)),
@@ -86,12 +86,12 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
             ConditionalConstraint cc_fn_c = new ConditionalConstraint(
                     new Terms(new Term(term)),
                     new Cache(term1Label),
-                    new Cache(labels.get(fnTerm.getTerm())),
+                    new Cache(terms.get(fnTerm.getTerm())),
                     new Cache(appLabel));
             constraints.add(cc_fn_c);
         }
 
-        for (var funTerm : labels.keySet().stream().filter(n -> n instanceof AFunTerm).map(n -> (AFunTerm) n).toList()) {
+        for (var funTerm : terms.keySet().stream().filter(n -> n instanceof AFunTerm).map(n -> (AFunTerm) n).toList()) {
             String term = funTerm.apply(prettyVisitor, 0);
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
                     new Terms(new Term(term)),
@@ -103,7 +103,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
             ConditionalConstraint cc_fn_c = new ConditionalConstraint(
                     new Terms(new Term(term)),
                     new Cache(term1Label),
-                    new Cache(labels.get(funTerm.getTerm())),
+                    new Cache(terms.get(funTerm.getTerm())),
                     new Cache(appLabel));
             constraints.add(cc_fn_c);
         }
