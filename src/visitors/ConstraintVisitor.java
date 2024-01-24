@@ -1,3 +1,5 @@
+package visitors;
+
 import fun.analysis.GAnalysisAdapter;
 import fun.node.*;
 import types.Cache;

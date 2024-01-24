@@ -4,6 +4,8 @@ import fun.lexer.Lexer;
 import fun.node.Start;
 import fun.parser.Parser;
 import types.constraint.Constraint;
+import visitors.ConstraintVisitor;
+import visitors.PrettyVisitorWithLabels;
 
 import java.io.FileReader;
 import java.io.PushbackReader;

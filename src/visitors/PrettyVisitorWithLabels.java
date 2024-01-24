@@ -1,3 +1,5 @@
+package visitors;
+
 import fun.node.*;
 
 import java.util.HashMap;
