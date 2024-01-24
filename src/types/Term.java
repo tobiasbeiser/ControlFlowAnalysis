@@ -1,7 +1,7 @@
 package types;
 
 public class Term {
-    private String value;
+    private final String value;
     public Term(String value) {
         this.value = value;
     }
@@ -13,8 +13,7 @@ public class Term {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Term) {
-            Term other = (Term) obj;
+        if (obj instanceof Term other) {
             return value.equals(other.value);
         }
         return false;

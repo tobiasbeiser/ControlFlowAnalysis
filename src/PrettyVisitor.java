@@ -29,12 +29,12 @@ public class PrettyVisitor extends fun.analysis.GAnalysisAdapter<String,Integer>
 	}
 	
 	private String getIndent (int i) {
-		String s = "  ";
+		StringBuilder s = new StringBuilder("  ");
 		while (i>0) {
-			s += "  ";
+			s.append("  ");
 			--i;
 		}
-		return s;
+		return s.toString();
 	}
 	
 

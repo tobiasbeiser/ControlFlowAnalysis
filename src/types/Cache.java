@@ -1,14 +1,6 @@
 package types;
 
-public class Cache implements Node {
-    private int label;
-
-    public Cache(int label) {
-        this.label = label;
-    }
-    public int getLabel() {
-        return label;
-    }
+public record Cache(int label) implements Node {
 
     @Override
     public String toString() {
@@ -17,15 +9,10 @@ public class Cache implements Node {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Cache) {
-            Cache other = (Cache) obj;
+        if (obj instanceof Cache other) {
             return label == other.label;
         }
         return false;
     }
 
-    @Override
-    public int hashCode() {
-        return label;
-    }
 }

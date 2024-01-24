@@ -1,8 +1,5 @@
 import fun.node.*;
 
-import java.awt.font.TextAttribute;
-import java.text.AttributedString;
-
 public class PrettyVisitorWithLabels extends PrettyVisitor {
     private int label = 0;
 

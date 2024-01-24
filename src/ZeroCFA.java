@@ -11,9 +11,9 @@ import java.util.*;
 
 public class ZeroCFA {
 
-    private List<Node> worklist = new LinkedList<>();
-    private Map<Node, Terms> data = new HashMap<>();
-    private Map<Node, List<Constraint>> edges = new HashMap<>();
+    private final List<Node> worklist = new LinkedList<>();
+    private final Map<Node, Terms> data = new HashMap<>();
+    private final Map<Node, List<Constraint>> edges = new HashMap<>();
 
     public ZeroCFA() {
     }
@@ -55,16 +55,16 @@ public class ZeroCFA {
         // STEP 2 Building the graph
         for (Constraint constraint : constraints) {
             if (constraint instanceof ConditionalConstraint) {
-                Node p = (Node) ((ConditionalConstraint) constraint).getP();
-                Node p1 = (Node) ((ConditionalConstraint) constraint).getP1();
+                Node p = (Node) ((ConditionalConstraint) constraint).p();
+                Node p1 = (Node) ((ConditionalConstraint) constraint).p1();
                 this.edges.get(p1).add(0, constraint);
                 this.edges.get(p).add(0, constraint);
             } else if (constraint instanceof NodeConstraint) {
-                Node p1 = ((NodeConstraint) constraint).getP1();
+                Node p1 = ((NodeConstraint) constraint).p1();
                 this.edges.get(p1).add(constraint);
             } else if (constraint instanceof TermConstraint) {
-                Node p = ((TermConstraint) constraint).getP();
-                Terms terms = ((TermConstraint) constraint).getTerms();
+                Node p = ((TermConstraint) constraint).p();
+                Terms terms = ((TermConstraint) constraint).terms();
                 add(p, terms);
             }
         }
@@ -74,15 +74,15 @@ public class ZeroCFA {
             Node q = worklist.remove(0);
             for (Constraint constraint : this.edges.get(q)) {
                 if (constraint instanceof NodeConstraint) {
-                    Node p1 = ((NodeConstraint) constraint).getP1();
-                    Node p2 = ((NodeConstraint) constraint).getP2();
+                    Node p1 = ((NodeConstraint) constraint).p1();
+                    Node p2 = ((NodeConstraint) constraint).p2();
                     add(p2, this.data.get(p1));
                 }
                 if (constraint instanceof ConditionalConstraint) {
-                    Node p = ((ConditionalConstraint) constraint).getP();
-                    Node p1 = ((ConditionalConstraint) constraint).getP1();
-                    Node p2 = ((ConditionalConstraint) constraint).getP2();
-                    Terms terms = ((ConditionalConstraint) constraint).getTerms();
+                    Node p = ((ConditionalConstraint) constraint).p();
+                    Node p1 = ((ConditionalConstraint) constraint).p1();
+                    Node p2 = ((ConditionalConstraint) constraint).p2();
+                    Terms terms = ((ConditionalConstraint) constraint).terms();
                     if (this.data.get(p).equals(terms)) {
                         add(p2, this.data.get(p1));
                     }
@@ -91,11 +91,11 @@ public class ZeroCFA {
         }
 
         //STEP 4 Output
-        for (Cache node : nodes.stream().filter(n -> n instanceof Cache).map(n -> (Cache) n).sorted((Comparator.comparingInt(Cache::getLabel))).toList()) {
-            System.out.println("C(" + node.getLabel() + ") = " + getData(node));
+        for (Cache node : nodes.stream().filter(n -> n instanceof Cache).map(n -> (Cache) n).sorted((Comparator.comparingInt(Cache::label))).toList()) {
+            System.out.println("C(" + node.label() + ") = " + getData(node));
         }
-        for (Environment node : nodes.stream().filter(n -> n instanceof Environment).map(n -> (Environment) n).sorted((Comparator.comparing(Environment::getVariable))).toList()) {
-            System.out.println("r(" + node.getVariable() + ") = " + getData(node));
+        for (Environment node : nodes.stream().filter(n -> n instanceof Environment).map(n -> (Environment) n).sorted((Comparator.comparing(Environment::variable))).toList()) {
+            System.out.println("r(" + node.variable() + ") = " + getData(node));
         }
     }
 

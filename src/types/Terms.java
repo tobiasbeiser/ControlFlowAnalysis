@@ -4,11 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Terms {
-    private Set<Term> terms;
-
-    public Terms(Set<Term> terms) {
-        this.terms = new HashSet<>(terms);
-    }
+    private final Set<Term> terms;
 
     public Terms(Term term) {
         this.terms = new HashSet<>();
@@ -31,10 +27,6 @@ public class Terms {
         this.terms.addAll(terms.getTerms());
     }
 
-    public boolean isEmpty() {
-        return this.terms.isEmpty();
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -45,13 +37,12 @@ public class Terms {
         if (builder.length() > 2) {
             builder.delete(builder.length() - 2, builder.length());
         }
-        return "{" + builder.toString() + "}";
+        return "{" + builder + "}";
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Terms) {
-            Terms terms = (Terms) obj;
+        if (obj instanceof Terms terms) {
             return this.terms.equals(terms.getTerms());
         }
         return false;

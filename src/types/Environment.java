@@ -1,14 +1,6 @@
 package types;
 
-public class Environment implements Node{
-    private String variable;
-    public Environment(String variable) {
-        this.variable = variable;
-    }
-
-    public String getVariable() {
-        return variable;
-    }
+public record Environment(String variable) implements Node {
 
     @Override
     public String toString() {
@@ -17,15 +9,10 @@ public class Environment implements Node{
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Environment) {
-            Environment other = (Environment) obj;
+        if (obj instanceof Environment other) {
             return variable.equals(other.variable);
         }
         return false;
     }
 
-    @Override
-    public int hashCode() {
-        return variable.hashCode();
-    }
 }

@@ -1,4 +1,3 @@
-import fun.analysis.GAnalysis;
 import fun.analysis.GAnalysisAdapter;
 import fun.node.*;
 import types.Cache;
@@ -10,7 +9,6 @@ import types.constraint.Constraint;
 import types.constraint.NodeConstraint;
 import types.constraint.TermConstraint;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +16,8 @@ import java.util.Map;
 
 public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<Constraint>> {
     private int label = 0;
-    private Map<AFnTerm, Integer> functionToBodyLabels = new HashMap<>();
-    private Map<AFunTerm, Integer> recFunctionToBodyLabels = new HashMap<>();
+    private final Map<AFnTerm, Integer> functionToBodyLabels = new HashMap<>();
+    private final Map<AFunTerm, Integer> recFunctionToBodyLabels = new HashMap<>();
 
     public List<Constraint> getConstraints(fun.node.Start ast) {
         return ast.apply(this, new ArrayList<>());
@@ -67,32 +65,6 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         return constraints;
     }
 
-
-
-
-    private List<Constraint> getConditionalConstraintFromTerm(PTerm term, int label) {
-        List<Constraint> constraints = new ArrayList<>();
-        if (term instanceof AFnTerm) {
-            String var = ((AFnTerm) term).getId().getText().trim();
-            ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
-                    new Terms(new Term(term.apply(new PrettyVisitor(), 0))),
-                    new Cache(label),
-                    new Cache(label + 1),
-                    new Environment(var));
-            constraints.add(cc_fn_rx);
-        } else if (term instanceof AFunTerm) {
-            String var = ((AFunTerm) term).getParam().getText().trim();
-            ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
-                    new Terms(new Term(term.apply(new PrettyVisitor(), 0))),
-                    new Cache(label),
-                    new Cache(label + 1),
-                    new Environment(var));
-            constraints.add(cc_fn_rx);
-        }
-        return constraints;
-    }
-
-
     @Override //[app]
     public List<Constraint> caseAAppTerm(AAppTerm node, List<Constraint> helper) {
         List<Constraint> constraints = new ArrayList<>(node.getFun().apply(this, helper));
@@ -103,12 +75,8 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
 
         PrettyVisitor prettyVisitor = new PrettyVisitor();
 
-        String term2 = node.getArg().apply(prettyVisitor, 0);
-
-        for (var fnTerm:functionToBodyLabels.keySet()){
+        for (var fnTerm : functionToBodyLabels.keySet()) {
             String term = fnTerm.apply(prettyVisitor, 0);
-
-
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
                     new Terms(new Term(term)),
                     new Cache(term1Label),
@@ -124,7 +92,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
             constraints.add(cc_fn_c);
         }
 
-        for (var funTerm:recFunctionToBodyLabels.keySet()){
+        for (var funTerm : recFunctionToBodyLabels.keySet()) {
             String term = funTerm.apply(prettyVisitor, 0);
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
                     new Terms(new Term(term)),
@@ -145,8 +113,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
 
     @Override //[if]
     public List<Constraint> caseAIfTerm(AIfTerm node, List<Constraint> helper) {
-        List<Constraint> constraints = new ArrayList<>();
-        constraints.addAll(node.getTest().apply(this, helper));
+        List<Constraint> constraints = node.getTest().apply(this, helper);
         constraints.addAll(node.getTruebranch().apply(this, helper));
         int trueLabel = this.label;
         constraints.addAll(node.getFalsebranch().apply(this, helper));
@@ -163,8 +130,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
 
     @Override //[let]
     public List<Constraint> caseALetTerm(ALetTerm node, List<Constraint> helper) {
-        List<Constraint> constraints = new ArrayList<>();
-        constraints.addAll(node.getVal().apply(this, helper));
+        List<Constraint> constraints = node.getVal().apply(this, helper);
         int valLabel = this.label;
         constraints.addAll(node.getBody().apply(this, helper));
         int bodyLabel = this.label;
@@ -177,7 +143,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
     }
 
     @Override //[op]
-    public List<Constraint> caseABinopTerm (ABinopTerm node, List<Constraint> helper) {
+    public List<Constraint> caseABinopTerm(ABinopTerm node, List<Constraint> helper) {
         List<Constraint> constraints = new ArrayList<>();
         constraints.addAll(node.getLeft().apply(this, helper));
         constraints.addAll(node.getRight().apply(this, helper));
