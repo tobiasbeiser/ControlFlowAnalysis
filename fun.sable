@@ -1,4 +1,4 @@
-/* while.sable - Specification of the While grammar. */
+/* fun.sable - Specification of the FUN grammar. */
 Package fun;
 
 

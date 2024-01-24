@@ -27,3 +27,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/ControlFlowAnalysis.jar
+/src/META-INF/MANIFEST.MF

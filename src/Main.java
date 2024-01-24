@@ -7,6 +7,7 @@ import types.constraint.Constraint;
 import visitors.ConstraintVisitor;
 import visitors.PrettyVisitorWithLabels;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.PushbackReader;
 import java.util.List;
@@ -20,22 +21,23 @@ public class Main {
                 Parser parser = new Parser(lexer);
                 Start ast = parser.parse();
                 PrettyVisitorWithLabels print = new PrettyVisitorWithLabels();
-                ConstraintVisitor constraintVisitor = new ConstraintVisitor();
+
                 System.out.println("Given program:");
                 System.out.println(print.getString(ast));
+
+                ConstraintVisitor constraintVisitor = new ConstraintVisitor();
                 List<Constraint> constraints = constraintVisitor.getConstraints(ast, print.getTerms());
 
                 ZeroCFA zeroCFA = new ZeroCFA();
                 System.out.println("Result of analysis:");
                 zeroCFA.worklist(constraints);
-
-
             } catch (Exception e) {
-                //System.err.println(e);
                 e.printStackTrace(System.err);
             }
         } else {
-            System.err.println("usage: java <inputFile>");
+            File dir = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+            System.out.println(dir);
+            System.err.println("Usage:\n ControlFlowAnalysis <inputFile>");
             System.exit(1);
         }
     }
