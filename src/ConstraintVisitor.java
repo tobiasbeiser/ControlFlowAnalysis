@@ -16,10 +16,11 @@ import java.util.Map;
 
 public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<Constraint>> {
     private int label = 0;
-    private final Map<AFnTerm, Integer> functionToBodyLabels = new HashMap<>();
-    private final Map<AFunTerm, Integer> recFunctionToBodyLabels = new HashMap<>();
 
-    public List<Constraint> getConstraints(fun.node.Start ast) {
+    private final Map<Node, Integer> labels = new HashMap<>();
+
+    public List<Constraint> getConstraints(fun.node.Start ast, Map<Node, Integer> labels) {
+        this.labels.putAll(labels);
         return ast.apply(this, new ArrayList<>());
     }
 
@@ -42,7 +43,6 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         PrettyVisitor prettyVisitor = new PrettyVisitor();
         List<Constraint> constraints = new ArrayList<>();
         List<Constraint> c2 = node.getTerm().apply(this, helper);
-        functionToBodyLabels.put(node, this.label);
         Term term = new Term(prettyVisitor.caseAFnTerm(node, 0));
         Constraint constraint = new TermConstraint(new Terms(term), new Cache(++this.label));
         constraints.add(constraint);
@@ -55,7 +55,6 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         PrettyVisitor prettyVisitor = new PrettyVisitor();
         List<Constraint> constraints = new ArrayList<>();
         List<Constraint> c2 = node.getTerm().apply(this, helper);
-        recFunctionToBodyLabels.put(node, this.label);
         Term term = new Term(prettyVisitor.caseAFunTerm(node, 0));
         Constraint c1 = new TermConstraint(new Terms(term), new Cache(++this.label));
         Constraint c3 = new TermConstraint(new Terms(term), new Environment(node.getName().getText().trim()));
@@ -75,7 +74,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
 
         PrettyVisitor prettyVisitor = new PrettyVisitor();
 
-        for (var fnTerm : functionToBodyLabels.keySet()) {
+        for (var fnTerm : labels.keySet().stream().filter(n -> n instanceof AFnTerm).map(n -> (AFnTerm) n).toList()) {
             String term = fnTerm.apply(prettyVisitor, 0);
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
                     new Terms(new Term(term)),
@@ -87,12 +86,12 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
             ConditionalConstraint cc_fn_c = new ConditionalConstraint(
                     new Terms(new Term(term)),
                     new Cache(term1Label),
-                    new Cache(functionToBodyLabels.get(fnTerm)),
+                    new Cache(labels.get(fnTerm.getTerm())),
                     new Cache(appLabel));
             constraints.add(cc_fn_c);
         }
 
-        for (var funTerm : recFunctionToBodyLabels.keySet()) {
+        for (var funTerm : labels.keySet().stream().filter(n -> n instanceof AFunTerm).map(n -> (AFunTerm) n).toList()) {
             String term = funTerm.apply(prettyVisitor, 0);
             ConditionalConstraint cc_fn_rx = new ConditionalConstraint(
                     new Terms(new Term(term)),
@@ -104,7 +103,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
             ConditionalConstraint cc_fn_c = new ConditionalConstraint(
                     new Terms(new Term(term)),
                     new Cache(term1Label),
-                    new Cache(recFunctionToBodyLabels.get(funTerm)),
+                    new Cache(labels.get(funTerm.getTerm())),
                     new Cache(appLabel));
             constraints.add(cc_fn_c);
         }

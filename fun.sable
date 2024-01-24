@@ -1,0 +1,138 @@
+/* while.sable - Specification of the While grammar. */
+Package fun;
+
+
+Helpers
+   ht  = 0x0009;
+   lf  = 0x000a;
+   ff  = 0x000c;
+   cr  = 0x000d;
+   sp  = ' ';
+
+   line_terminator = lf | cr | cr lf;
+
+   letter = ['a'..'z'] | ['A'..'Z'];
+   digit  = ['0'..'9'];
+
+
+Tokens
+
+    white_space = sp | ht | line_terminator;
+
+    lparen    = '(';
+    rparen    = ')';
+
+
+    ctrue     = 'true';
+    cfalse    = 'false';
+    fn        = 'fn';
+    fun       = 'fun';
+    if        = 'if';
+    then      = 'then';
+    else      = 'else';
+    let       = 'let';
+    in        = 'in';
+
+    implies   = '=>';
+    is        = '=';
+    plus      = '+';
+    minus     = '-';
+    times     = '*';
+    and       = '&&';
+    or        = '||';
+    ls        = '<';
+    gt        = '>';
+
+    integer = '0'| ['1'..'9'] digit*;
+    id      = letter+(digit|letter)*;
+
+
+Ignored Tokens
+    white_space;
+
+
+Productions
+	term { -> term }
+		 = {let} tlet { -> tlet.term}
+		 | {fn} fn id implies term { -> New term.fn(id,term)}
+		 | {fun} fun [name]:id [param]:id implies term { -> New term.fun(name,param,term)}
+		 ;
+
+	tlet { -> term}
+		 = {let} let id is [val]:term in [body]:tlet { -> New term.let(id,val.term,body.term)}
+		 | {if} tif { -> tif.term}
+		 ;
+
+	tif { -> term}
+	     = {if} if [test]:term then [tbranch]:term else [fbranch]:tif { -> New term.if(test.term,tbranch.term,fbranch.term)}
+	     | {or} tor { -> tor.term}
+	     ;
+
+	tor { -> term}
+	     = {and} tand { -> tand.term}
+	      | {or} [left]:tcomp or [right]:tand { -> New term.binop(New op.or(),left.term, right.term)}
+	      ;
+
+	tand { -> term}
+	     = {comp} tcomp { -> tcomp.term}
+	      | {and} [left]:tcomp and [right]:tand { -> New term.binop(New op.and(),left.term, right.term)}
+	      ;
+
+	tcomp { -> term}
+		 = {summand} tsummand { -> tsummand.term}
+		 | {gt} [left]:tsummand gt [right]:tcomp { -> New term.binop(New op.gt(),left.term, right.term)}
+		 | {ls} [left]:tsummand ls [right]:tcomp { -> New term.binop(New op.ls(),left.term, right.term)}
+		 ;
+
+
+	tsummand { -> term}
+		 = {factor} tfactor { -> tfactor.term}
+		 | {sum} [left]:tfactor plus [right]:tsummand { -> New term.binop(New op.plus(),left.term, right.term)}
+		 | {diff} [left]:tfactor minus [right]:tsummand { -> New term.binop(New op.minus(),left.term, right.term)}
+		 ;
+
+    tfactor { -> term}
+    	  = {app} tapp { -> tapp.term}
+    	  | {prod} [left]:tapp times [right]:tfactor { -> New term.binop(New op.times(),left.term,right.term)}
+    	  ;
+
+    tapp { -> term}
+          = {app} [fun]:tsingle [arg]:tapp { -> New term.app(fun.term,arg.term)}
+          | {single} tsingle             { -> tsingle.term}
+          ;
+
+    tsingle { -> term}
+          = {const} const { -> New term.const(const)}
+          | {ident} id    { -> New term.ident(id)}
+          | {parens} lparen term rparen {-> term.term}
+          ;
+
+    const { -> const}
+    	  = {cnum} integer     { -> New const.cnum(integer)}
+          | {ctrue} ctrue   { -> New const.ctrue()}
+          | {cfalse} cfalse { -> New const.cfalse()}
+          ;
+
+
+Abstract Syntax Tree
+
+    term = {const} const
+  		 | {ident} id
+         | {fn} id term
+  	     | {fun} [name]:id [param]:id term
+         | {app} [fun]:term [arg]:term
+         | {if} [test]:term [truebranch]:term [falsebranch]:term
+         | {let} id [val]:term [body]:term
+         | {binop} op [left]:term [right]:term ;
+
+    const = {cnum} integer
+          | {ctrue}
+          | {cfalse} ;
+
+    op = {plus}
+  	   | {times}
+       | {minus}
+       | {and}
+       | {or}
+       | {ls}
+       | {gt} ;

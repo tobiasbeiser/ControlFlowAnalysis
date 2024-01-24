@@ -17,11 +17,11 @@ public class Main {
                         new FileReader(args[0]), 1024));
                 Parser parser = new Parser(lexer);
                 Start ast = parser.parse();
-                PrettyVisitor print = new PrettyVisitorWithLabels();
+                PrettyVisitorWithLabels print = new PrettyVisitorWithLabels();
                 ConstraintVisitor constraintVisitor = new ConstraintVisitor();
                 System.out.println("Given program:");
                 System.out.println(print.getString(ast));
-                List<Constraint> constraints = constraintVisitor.getConstraints(ast);
+                List<Constraint> constraints = constraintVisitor.getConstraints(ast, print.getLabels());
 
                 ZeroCFA zeroCFA = new ZeroCFA();
                 System.out.println("Result of analysis:");

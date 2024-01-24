@@ -1,10 +1,15 @@
 import fun.node.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PrettyVisitorWithLabels extends PrettyVisitor {
     private int label = 0;
+    private final Map<Node, Integer> labels = new HashMap<>();
 
-    private String getLabel() {
+    private String getLabel(Node node) {
         String exponent = Integer.toString(++this.label);
+        labels.put(node, this.label);
         String[] digits = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"};
 
         // Convert the integer to a superscript string
@@ -15,39 +20,42 @@ public class PrettyVisitorWithLabels extends PrettyVisitor {
         return result.toString();
     }
 
+    public Map<Node, Integer> getLabels() {
+        return this.labels;
+    }
 
     @Override
     public String caseAAppTerm(AAppTerm node, Integer helper) {
-        return super.caseAAppTerm(node, helper) + getLabel();
+        return super.caseAAppTerm(node, helper) + getLabel(node);
     }
 
     @Override
     public String caseAFnTerm(AFnTerm node, Integer helper) {
-        return "(" + super.caseAFnTerm(node, helper) + ")" + getLabel();
+        return "(" + super.caseAFnTerm(node, helper) + ")" + getLabel(node);
     }
 
     @Override
     public String caseAFunTerm(AFunTerm node, Integer helper) {
-        return "(" + super.caseAFunTerm(node, helper) + ")" + getLabel();
+        return "(" + super.caseAFunTerm(node, helper) + ")" + getLabel(node);
     }
 
     @Override
     public String caseAIdentTerm(AIdentTerm node, Integer helper) {
-        return super.caseAIdentTerm(node, helper) + getLabel();
+        return super.caseAIdentTerm(node, helper) + getLabel(node);
     }
 
     @Override
     public String caseALetTerm(ALetTerm node, Integer helper) {
-        return "(" + super.caseALetTerm(node, helper) + ")" + getLabel();
+        return "(" + super.caseALetTerm(node, helper) + ")" + getLabel(node);
     }
 
     @Override
     public String caseAConstTerm(AConstTerm node, Integer helper) {
-        return super.caseAConstTerm(node, helper) + getLabel();
+        return super.caseAConstTerm(node, helper) + getLabel(node);
     }
 
     @Override
     public String caseABinopTerm(ABinopTerm node, Integer helper) {
-        return super.caseABinopTerm(node, helper) + getLabel();
+        return super.caseABinopTerm(node, helper) + getLabel(node);
     }
 }
