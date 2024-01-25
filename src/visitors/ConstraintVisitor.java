@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<Constraint>> {
-    private int label = 0;
-
     private final Map<Node, Integer> terms = new HashMap<>();
 
     public List<Constraint> getConstraints(fun.node.Start ast, Map<Node, Integer> terms) {
@@ -34,7 +32,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
     @Override //[var]
     public List<Constraint> caseAIdentTerm(AIdentTerm node, List<Constraint> helper) {
         Environment var = new Environment(node.getId().getText().trim());
-        Constraint constraint = new NodeConstraint(var, new Cache(++this.label));
+        Constraint constraint = new NodeConstraint(var, new Cache(terms.get(node)));
         ArrayList<Constraint> constraints = new ArrayList<>();
         constraints.add(constraint);
         return constraints;
@@ -46,7 +44,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         List<Constraint> constraints = new ArrayList<>();
         List<Constraint> c2 = node.getTerm().apply(this, helper);
         Term term = new Term(prettyVisitor.caseAFnTerm(node, 0));
-        Constraint constraint = new TermConstraint(new Terms(term), new Cache(++this.label));
+        Constraint constraint = new TermConstraint(new Terms(term), new Cache(terms.get(node)));
         constraints.add(constraint);
         constraints.addAll(c2);
         return constraints;
@@ -58,7 +56,7 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
         List<Constraint> constraints = new ArrayList<>();
         List<Constraint> c2 = node.getTerm().apply(this, helper);
         Term term = new Term(prettyVisitor.caseAFunTerm(node, 0));
-        Constraint c1 = new TermConstraint(new Terms(term), new Cache(++this.label));
+        Constraint c1 = new TermConstraint(new Terms(term), new Cache(terms.get(node)));
         Constraint c3 = new TermConstraint(new Terms(term), new Environment(node.getName().getText().trim()));
         constraints.add(c1);
         constraints.addAll(c2);
@@ -69,10 +67,10 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
     @Override //[app]
     public List<Constraint> caseAAppTerm(AAppTerm node, List<Constraint> helper) {
         List<Constraint> constraints = new ArrayList<>(node.getFun().apply(this, helper));
-        int term1Label = this.label;
+        int term1Label = terms.get(node.getFun());
         constraints.addAll(node.getArg().apply(this, helper));
-        int term2Label = this.label;
-        int appLabel = ++this.label;
+        int term2Label = terms.get(node.getArg());
+        int appLabel = terms.get(node);
 
         PrettyVisitor prettyVisitor = new PrettyVisitor();
 
@@ -116,10 +114,10 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
     public List<Constraint> caseAIfTerm(AIfTerm node, List<Constraint> helper) {
         List<Constraint> constraints = node.getTest().apply(this, helper);
         constraints.addAll(node.getTruebranch().apply(this, helper));
-        int trueLabel = this.label;
+        int trueLabel = terms.get(node.getTruebranch());
         constraints.addAll(node.getFalsebranch().apply(this, helper));
-        int falseLabel = this.label;
-        int testLabel = ++this.label;
+        int falseLabel = terms.get(node.getFalsebranch());
+        int testLabel = terms.get(node.getTest());
 
         Constraint c1 = new NodeConstraint(new Cache(trueLabel), new Cache(testLabel));
         Constraint c2 = new NodeConstraint(new Cache(falseLabel), new Cache(testLabel));
@@ -132,10 +130,10 @@ public class ConstraintVisitor extends GAnalysisAdapter<List<Constraint>, List<C
     @Override //[let]
     public List<Constraint> caseALetTerm(ALetTerm node, List<Constraint> helper) {
         List<Constraint> constraints = node.getVal().apply(this, helper);
-        int valLabel = this.label;
+        int valLabel = terms.get(node.getVal());
         constraints.addAll(node.getBody().apply(this, helper));
-        int bodyLabel = this.label;
-        int letLabel = ++this.label;
+        int bodyLabel = terms.get(node.getBody());
+        int letLabel = terms.get(node);
         Constraint c1 = new NodeConstraint(new Cache(valLabel), new Environment(node.getId().getText().trim()));
         Constraint c2 = new NodeConstraint(new Cache(bodyLabel), new Cache(letLabel));
         constraints.add(c1);
