@@ -30,3 +30,6 @@ bin/
 /ControlFlowAnalysis.jar
 /src/META-INF/MANIFEST.MF
 /.idea/artifacts/ControlFlowAnalysis_jar.xml
+
+
+.idea
